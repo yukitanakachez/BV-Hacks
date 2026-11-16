@@ -14,6 +14,7 @@ import {
 import { GlassFilter } from "../components/Icons";
 import { Island } from "../components/Island";
 import {
+  Callout,
   Captions,
   Cursor,
   Keycaps,
@@ -22,6 +23,7 @@ import {
   cursorAt,
 } from "../components/Overlays";
 import {
+  CALLOUTS,
   CAMERA,
   CAPTIONS,
   COUNTER_SPAN,
@@ -174,6 +176,7 @@ export const Demo: React.FC = () => {
         </div>
       </div>
       <SwitchCounter frame={frame} />
+      <Callout cues={CALLOUTS} cam={cam} frame={frame} fps={fps} />
       <Keycaps events={KEYS} frame={frame} fps={fps} />
       <Captions cues={CAPTIONS} frame={frame} fps={fps} />
     </AbsoluteFill>

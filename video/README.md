@@ -1,6 +1,6 @@
 # Nod demo video
 
-A 76-second, 1920×1080, 30 fps demo of Nod, made with [Remotion](https://remotion.dev). The island UI is a React port of `docs/design/prototype.html`: same class names, colors, sizes and glass, and the same spring physics, driven frame by frame so every render is identical.
+A 93-second, 1920×1080, 30 fps demo of Nod, made with [Remotion](https://remotion.dev). The island UI is a React port of `docs/design/prototype.html`: same class names, colors, sizes and glass, and the same spring physics, driven frame by frame so every render is identical.
 
 - Narration and shot list: [`script.md`](script.md)
 - Rendered video: `out/nod-demo.mp4`, with review stills in `out/frames/`
@@ -50,7 +50,7 @@ The filenames are the contract. Keep them exactly:
 ```
 01a-problem 01b-problem 01c-problem 02a-reveal 02b-reveal
 03a-progress 03b-progress 03c-progress 04a-approve 04b-approve 04c-approve
-05a-risk 05b-risk 05c-risk 06a-high 06b-high 06c-high 07a-many 07b-many 08a-close
+05a-risk 05b-risk 05c-risk 06a-high 06b-high 06c-high 06d-learn 07a-many 07b-many 08a-close
 ```
 
 1. Generate each line from `text` in `src/data/vo-lines.json`, one file per line, using the reading notes at the bottom of `script.md`. Either export one file per line from ElevenLabs, or record one take and split it at the pauses.
@@ -69,6 +69,10 @@ The filenames are the contract. Keep them exactly:
    ```
    `npm run vo` without `--force` never overwrites existing files, so it's also safe to run after a swap.
 4. Look at the stills. If a line runs much longer than the placeholder and a visual lands early, increase that line's `gap` or the following pause in `LAYOUT` (`src/timeline.ts`). `story.ts` throws a clear error if a change puts keyframes out of order.
+
+### Generating a line with the ElevenLabs API
+
+`scripts/eleven-vo.sh <id>...` reads each line's `text` from `src/data/vo-lines.json`, generates it in the final read's voice (Brian, `eleven_v4`), and converts it exactly like step 2 above, so it works with Remotion's bundled ffmpeg too. The key comes from `ELEVENLABS_API_KEY` in your environment or in the repo's root `.env` (gitignored), and is never printed. Downloads are cached in `out/vo-cache/` so a re-run doesn't spend credits. Then `npm run vo:measure` and render as usual.
 
 ## Music
 

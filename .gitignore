@@ -7,3 +7,6 @@ node_modules/
 .build/
 *.png.tmp
 .claude/
+
+# local secrets (API keys)
+.env

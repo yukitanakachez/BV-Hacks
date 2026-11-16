@@ -25,6 +25,8 @@
     { "id": "06b-high", "beat": "high", "text": "Delete fourteen files outside this repo? It tells you why.", "caption": "It tells you why" },
     { "id": "06c-high", "beat": "high", "text": "Deny is the default. Allowing takes a deliberate hold.", "caption": "Deny by default. Hold to allow." },
 
+    { "id": "06d-learn", "beat": "learn", "text": "Nod learns how you decide, on your Mac, and flags anything unusual for you.", "caption": "" },
+
     { "id": "07a-many", "beat": "many", "text": "Run as many agents as you like. Requests queue up, one keystroke each.", "caption": "Many agents. One queue." },
     { "id": "07b-many", "beat": "many", "text": "Always allow npm test here, and next time it just goes through.", "say": "Always allow N P M test here, [[slnc 60]] and next time, it just goes through.", "caption": "Always allow npm test here" },
 

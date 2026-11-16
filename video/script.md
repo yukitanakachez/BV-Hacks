@@ -1,6 +1,6 @@
 # Nod demo video: narrated script
 
-**Runtime:** 86 s · 1920×1080 · 30 fps · `out/nod-demo.mp4`
+**Runtime:** 93 s · 1920×1080 · 30 fps · `out/nod-demo.mp4`
 **Voice:** one narrator, warm and unhurried, conversational. Final read: ElevenLabs, voice "Brian" (eleven_v4), first take of each line; the original macOS `say` placeholder timing is superseded.
 **Timestamps** come from the placeholder VO (`src/generated/vo-durations.json`). The whole video re-times itself when you swap in the final VO (see `README.md`), so treat these as targets, not hard cuts.
 
@@ -72,20 +72,30 @@ Each line is its own audio file, `public/vo/<id>.wav`. Keep the IDs.
 
 **On screen:** **Delete 14 files outside this repo**, `$ rm -rf ../design-assets/export/*`, the red **High risk** pill, and a red glow bleeding out from under the island with no outline. On "why," the chips pop in turn: *Outside the project · Not in git · can't undo · 14 files · 38 MB*. The big red **Deny ⌥↵** button is the default. On "deliberate hold," the cursor presses **Hold to allow**: the red fill creeps across, the user lets go at about 60%, and it springs back. Then ⌥↵ (red-tinted keycaps) and the island answers **Denied ✕**.
 
-## 0:59 – 1:11 · (f) Many agents at once, plus rules
+## 0:59 – 1:07 · (e3) Learned approvals
 
 | ID | Time | VO | Caption |
 |---|---|---|---|
-| `07a-many` | 0:59.7 | "Run as many agents as you like. Requests queue up, one keystroke each." | Many agents. One queue. |
-| `07b-many` | 1:04.5 | "Always allow npm test here, and next time it just goes through." | Always allow npm test here |
+| `06d-learn` | 1:00.0 | "Nod learns how you decide, on your Mac, and flags anything unusual for you." | It learns how you decide → ● and flags what's unusual for you |
+
+**On screen:** the CI session asks to **Deploy to staging** (`npm run deploy:staging`) with the amber **Review** pill. Next to it, the learned chip reads **Unusual for you · 95% deny** in amber and pops as the camera leans in. A callout hangs from the chip: **You deny deploys like this** / *Learned on your Mac · never leaves it*. Then ⌥⌫ (red-tinted keycaps) and the island answers **Denied ✕**. The caption switches halfway through the line, near "and flags". This line was generated with `scripts/eleven-vo.sh` (ElevenLabs, Brian, `eleven_v4`).
+
+Earlier, on the very first card (*Run the auth test suite*, 0:31), the grey chip **Likely allow · 97%** pops and a callout reads **On-device machine learning** / *Predicts your answer from your past decisions*. Every request card in the video carries a chip.
+
+## 1:07 – 1:19 · (f) Many agents at once, plus rules
+
+| ID | Time | VO | Caption |
+|---|---|---|---|
+| `07a-many` | 1:07.5 | "Run as many agents as you like. Requests queue up, one keystroke each." | Many agents. One queue. |
+| `07b-many` | 1:12.3 | "Always allow npm test here, and next time it just goes through." | Always allow npm test here |
 
 **On screen:** three avatars show amber "needs you" dots. The queue drains one ⌥↵ at a time: *Fetch docs.example.com* (Review), then *Build the project* (Low), then *Run the auth test suite*, with the dots clearing as it goes. On 07b the cursor clicks **Always allow `npm test`**. The camera leans in on the notch: **Always allow `npm test` ✓**. A few seconds later the next `npm test` passes straight through as **Auto-allowed `npm test` ✓**, with no card and no keystroke.
 
-## 1:11 – 1:16 · (g) Close
+## 1:19 – 1:24 · (g) Close
 
 | ID | Time | VO | Caption |
 |---|---|---|---|
-| `08a-close` | 1:11.5 | "Nod. Approve your agents from the notch." | none (end card) |
+| `08a-close` | 1:19.3 | "Nod. Approve your agents from the notch." | none (end card) |
 
 **On screen:** the island shows **Done ✓** as the camera pulls back to the whole MacBook screen, then a cross-fade to the end card: the mascot, **Nod**, *"Approve your agents from the notch."*, and *For Claude Code · macOS 26 · Built at BV Hacks 2026*. The music fades out.
 

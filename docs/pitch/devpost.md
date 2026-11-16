@@ -2,7 +2,7 @@
 
 > **Tagline:** Nod puts your Claude Code agents in the MacBook notch. See what each one is doing, read a plain-English risk call on every request, and answer it with ⌥↵ without leaving your editor.
 >
-> **Demo video:** `video/out/nod-demo.mp4` (76 s) · **Built with:** Swift 6, SwiftUI (Liquid Glass), AppKit, Network.framework, Claude Code hooks, bash/curl/jq, Remotion
+> **Demo video:** `video/out/nod-demo.mp4` (93 s) · **Built with:** Swift 6, SwiftUI (Liquid Glass), AppKit, Network.framework, Claude Code hooks, bash/curl/jq, Remotion
 >
 ## Inspiration
 

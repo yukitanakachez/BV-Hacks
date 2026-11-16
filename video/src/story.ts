@@ -12,6 +12,7 @@ import {
   CursorKey,
   KeyEvent,
   CaptionCue,
+  CalloutCue,
 } from "./components/Overlays";
 import { TermState, termYesPoint, TYPED_LEN } from "./components/Desktop";
 import { FPS, L, LINE_LIST, P, TOTAL, sec } from "./timeline";
@@ -82,6 +83,21 @@ export const REQ_HIGH: ReqSpec = {
   acts: "high",
   learned: { text: "Likely deny · 95%" },
 };
+// a review-level request this user always denies: the learned chip disagrees with the pill
+const REQ_DEPLOY: ReqSpec = {
+  ring: 2,
+  over: { 2: "need" },
+  ask: "Deploy to staging",
+  risk: "med",
+  body: {
+    kind: "cmd",
+    cmd: "npm run deploy:staging",
+    why: "network · outside repo",
+  },
+  acts: "allow",
+  always: "npm run deploy",
+  learned: { text: "Unusual for you · 95% deny", unusual: true },
+};
 const Q1: ReqSpec = {
   ring: 3,
   over: { 0: "need", 2: "need", 3: "need" },
@@ -107,6 +123,11 @@ const Q2: ReqSpec = {
   learned: { text: "Likely allow · 96%" },
 };
 const Q3: ReqSpec = { ...REQ_LOW, over: { 0: "need" } };
+
+// bottom centre of each card's learned chip, in screen points (measured from stills)
+const CHIP_LOW = { x: 866, y: 108 };
+const CHIP_DEPLOY = { x: 845, y: 108 };
+const CARD_BOTTOM = 226; // just under an expanded request card
 
 /* ------------------------------------------------------------------ */
 /* Anchors                                                             */
@@ -136,6 +157,11 @@ const T = {
   h2: L("06b"),
   h3: L("06c"),
   hDeny: P("high-deny"),
+  learn: {
+    from: L("06d").from - sec(0.7),
+    line: L("06d"),
+    end: P("learn-deny").end,
+  },
   m1: L("07a"),
   m2: L("07b"),
   mAuto: P("auto-allow"),
@@ -242,6 +268,7 @@ const MED_PRESS = T.kAllow.from + 8;
 const HIGH_HOLD_DOWN = T.h3.from + 50;
 const HIGH_HOLD_LEN = 17; // released at ~60% of the 0.9 s hold
 const DENY_PRESS = T.hDeny.from + 10;
+const LEARN_DENY = P("learn-deny").from + 6;
 const Q1_PRESS = T.m1.from + 30;
 const QUEUE_TOAST = 22; // "Allowed" stays up long enough to read before the next request opens
 const Q2_AT = Q1_PRESS + 4 + QUEUE_TOAST;
@@ -274,6 +301,10 @@ export const ISLAND: IslandKey[] = [
   { at: T.h1.from, view: { k: "req", r: REQ_HIGH } },
   { at: DENY_PRESS + 4, view: { k: "toast", v: "denied" } },
   { at: DENY_PRESS + 4 + 39, view: { k: "working" } },
+  // learned approvals: a habit that disagrees with the risk read-out
+  { at: T.learn.from, view: { k: "req", r: REQ_DEPLOY } },
+  { at: LEARN_DENY + 4, view: { k: "toast", v: "denied" } },
+  { at: LEARN_DENY + 4 + 30, view: { k: "working" } },
   // many agents: a queue, then a rule
   { at: T.m1.from, view: { k: "req", r: Q1 } },
   { at: Q1_PRESS + 4, view: { k: "toast", v: "allowed" } },
@@ -305,7 +336,7 @@ export function islandFx(f: number): IslandFx {
     pressWin(Q2_PRESS)
   )
     fx.press = "allow";
-  if (pressWin(DENY_PRESS)) fx.press = "deny";
+  if (pressWin(DENY_PRESS) || pressWin(LEARN_DENY)) fx.press = "deny";
   if (f >= AVATAR_CLICK && f < AVATAR_CLICK + 4) {
     fx.press = "avatar";
     fx.pressAvatar = 1;
@@ -334,8 +365,11 @@ export function islandFx(f: number): IslandFx {
     pulse(f, T.k2.from + 2, 34),
     pulse(f, T.h1.from + 12, 34),
   );
-  // the learned chip pops once, just after the first card opens
-  fx.learnPop = pulse(f, T.a1.from + 46, 34);
+  // the learned chip pops just after the first card opens, and again on the unusual one
+  fx.learnPop = Math.max(
+    pulse(f, T.a1.from + 46, 34),
+    pulse(f, T.learn.from + 24, 34),
+  );
   fx.chipPop = [0, 1, 2].map((i) => pulse(f, T.h2.from + sec(2.3) + i * 8, 28));
   fx.diffPop = pulse(f, T.k3.from + sec(1.4), 40);
   return fx;
@@ -350,11 +384,12 @@ const keyEv = (
   tint: "orange" | "red" = "orange",
   lead = 14,
   tail = 16,
+  keys: KeyEvent["keys"] = ["opt", "ret"],
 ): KeyEvent => ({
   show: press - lead,
   press,
   hide: press + tail,
-  keys: ["opt", "ret"],
+  keys,
   tint,
 });
 export const KEYS: KeyEvent[] = [
@@ -362,6 +397,7 @@ export const KEYS: KeyEvent[] = [
   keyEv(PRE_MED_PRESS, "orange", 12, 12),
   keyEv(MED_PRESS, "orange", 12, 14),
   keyEv(DENY_PRESS, "red", 16, 22),
+  keyEv(LEARN_DENY, "red", 16, 18, ["opt", "del"]),
   keyEv(Q1_PRESS, "orange", 12, 12),
   keyEv(Q2_PRESS, "orange", 12, 12),
 ];
@@ -423,6 +459,9 @@ export const CAMERA: CamKey[] = [
   { at: T.k1.from - 16, dur: 24, cam: NOTCH(2.0) },
   { at: T.h1.from, dur: T.h3.end - T.h1.from, cam: NOTCH(2.12) },
   { at: T.hDeny.from + 20, dur: 24, cam: NOTCH(1.95) },
+  // lean in on the learned chip, then back out for the queue
+  { at: T.learn.from + 4, dur: 30, cam: NOTCH(2.6) },
+  { at: LEARN_DENY + 8, dur: 24, cam: NOTCH(1.95) },
   // lean in on the compact notch for "rule saved" and "auto-allowed"
   { at: ALWAYS_CLICK + 8, dur: 22, cam: NOTCH(2.8) },
   { at: T.mAuto.from + 6, dur: 54, cam: WIDE },
@@ -455,13 +494,46 @@ const ACCENT: Record<string, string> = {
   "06a-high": "#FF453A",
 };
 
-export const CAPTIONS: CaptionCue[] = LINE_LIST.filter((l) => l.caption).map(
+const VO_CAPTIONS: CaptionCue[] = LINE_LIST.filter((l) => l.caption).map(
   (l, i, arr) => {
     const next = arr[i + 1];
     const to = Math.min(l.end + 30, next ? next.from : TOTAL);
     return { from: l.from, to, text: l.caption, accent: ACCENT[l.id] };
   },
 );
+// 06d's caption comes in two parts, split near "and flags"
+const LEARN_SPLIT = T.learn.line.from + Math.round(T.learn.line.dur * 0.55);
+export const CAPTIONS: CaptionCue[] = [
+  ...VO_CAPTIONS,
+  { from: T.learn.from + 6, to: LEARN_SPLIT, text: "It learns how you decide" },
+  {
+    from: LEARN_SPLIT,
+    to: T.learn.end + 6,
+    text: "and flags what’s unusual for you",
+    accent: "#FFB340",
+  },
+].sort((a, b) => a.from - b.from);
+
+/** Labels that point at the learned chip (screen coordinates for the anchor). */
+export const CALLOUTS: CalloutCue[] = [
+  {
+    from: T.a1.from + 50,
+    to: APPROVE_PRESS + 2,
+    anchor: CHIP_LOW,
+    below: CARD_BOTTOM,
+    title: "On-device machine learning",
+    sub: "Predicts your answer from your past decisions",
+  },
+  {
+    from: T.learn.from + 34,
+    to: LEARN_DENY + 2,
+    anchor: CHIP_DEPLOY,
+    below: CARD_BOTTOM,
+    title: "You deny deploys like this",
+    sub: "Learned on your Mac · never leaves it",
+    tone: "amber",
+  },
+];
 
 export const REVEAL_GLOW = { at: T.r1.from - 2 };
 export const TITLE_OUT = T.titleEnd;

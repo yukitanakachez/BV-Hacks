@@ -43,6 +43,9 @@ const LAYOUT: Step[] = [
   { line: "06b-high", gap: 0.3 },
   { line: "06c-high", gap: 0.35 },
   { pause: "high-deny", sec: 2.4 },
+  // learned approvals: the card opens in the gap, the deny lands in the pause
+  { line: "06d-learn", gap: 0.9 },
+  { pause: "learn-deny", sec: 1.7 },
   { line: "07a-many", gap: 0.4 },
   { line: "07b-many", gap: 0.5 },
   { pause: "auto-allow", sec: 2.4 },

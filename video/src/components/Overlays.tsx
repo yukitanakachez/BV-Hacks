@@ -266,6 +266,111 @@ export const Keycaps: React.FC<{
 };
 
 /* ------------------------------------------------------------------ */
+/* Callout: a label under a point on screen, joined by a leader line   */
+/* ------------------------------------------------------------------ */
+
+export type CalloutCue = {
+  from: number;
+  to: number;
+  anchor: { x: number; y: number }; // screen points
+  below: number; // screen y the label hangs from (under the card)
+  title: string;
+  sub: string;
+  tone?: "amber";
+};
+
+export const Callout: React.FC<{
+  cues: CalloutCue[];
+  cam: Cam;
+  frame: number;
+  fps: number;
+}> = ({ cues, cam, frame, fps }) => {
+  const cue = cues.find((c) => frame >= c.from && frame < c.to + 8);
+  if (!cue) return null;
+  const pin = spring({
+    frame: frame - cue.from,
+    fps,
+    config: { damping: 15, stiffness: 190, mass: 0.7 },
+  });
+  const pout = interpolate(frame, [cue.to, cue.to + 8], [0, 1], clamp);
+  const op = pin * (1 - pout);
+  // the anchor follows the camera
+  const ax = cam.px + (cue.anchor.x - cam.fx) * cam.s;
+  const ay = cam.py + (cue.anchor.y - cam.fy) * cam.s;
+  const boxTop = cam.py + (cue.below - cam.fy) * cam.s;
+  const lead = Math.max(0, boxTop - ay - 14) * pin;
+  const color = cue.tone === "amber" ? "#FFB340" : "#E8916E";
+  const W = 760;
+  const left = Math.max(40, Math.min(1920 - 40 - W, ax - W / 2));
+  return (
+    <div style={{ position: "absolute", inset: 0, opacity: op, zIndex: 66 }}>
+      <div
+        style={{
+          position: "absolute",
+          left: ax - 7,
+          top: ay + 2,
+          width: 14,
+          height: 14,
+          borderRadius: 7,
+          background: color,
+          boxShadow: `0 0 18px ${color}`,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          left: ax - 1.5,
+          top: ay + 14,
+          width: 3,
+          height: lead,
+          background: `linear-gradient(${color}, rgba(255,255,255,.25))`,
+          borderRadius: 2,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          left,
+          top: ay + 14 + lead,
+          width: W,
+          padding: "20px 30px 22px",
+          borderRadius: 26,
+          background: "rgba(12,12,16,.78)",
+          backdropFilter: "blur(22px) saturate(1.4)",
+          WebkitBackdropFilter: "blur(22px) saturate(1.4)",
+          boxShadow: `inset 0 1px 0 rgba(255,255,255,.14), inset 0 0 0 1.5px ${color}55, 0 24px 50px -18px rgba(0,0,0,.85)`,
+          fontFamily: '"SF Pro Display", system-ui, -apple-system, sans-serif',
+          color: "#fff",
+          textAlign: "center",
+          transform: `translateY(${(1 - pin) * 18}px) scale(${0.95 + 0.05 * pin})`,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 40,
+            fontWeight: 800,
+            letterSpacing: "-0.02em",
+            color,
+          }}
+        >
+          {cue.title}
+        </div>
+        <div
+          style={{
+            marginTop: 6,
+            fontSize: 28,
+            fontWeight: 600,
+            color: "rgba(255,255,255,.72)",
+          }}
+        >
+          {cue.sub}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/* ------------------------------------------------------------------ */
 /* Captions (bold, bottom centre)                                      */
 /* ------------------------------------------------------------------ */
 
