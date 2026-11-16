@@ -2,7 +2,8 @@
 # Generate VO lines with the ElevenLabs API, in the final read's voice, and convert
 # them like the README's swap step (trim, 60 ms of air, loudnorm, 48 kHz mono WAV).
 # Trimming uses silencedetect + atrim, so it also works with Remotion's bundled ffmpeg.
-# Downloads are cached in out/vo-cache/ so a re-run doesn't spend credits again.
+# Downloads are cached in out/vo-cache/ (keyed by text, voice and model) so a re-run doesn't spend credits.
+# A line's optional `eleven` field overrides `text` for the API (e.g. to spell out how a name is said).
 #
 #   scripts/eleven-vo.sh 06d-learn [more ids...]
 #
@@ -28,9 +29,9 @@ CACHE=out/vo-cache
 mkdir -p "$CACHE"
 
 for id in "$@"; do
-  text="$(jq -r --arg id "$id" '.lines[] | select(.id == $id) | .text' "$LINES")"
+  text="$(jq -r --arg id "$id" '.lines[] | select(.id == $id) | .eleven // .text' "$LINES")"
   [[ -n "$text" ]] || { echo "unknown line $id" >&2; exit 1; }
-  mp3="$CACHE/$id.mp3"
+  mp3="$CACHE/$id-$(printf '%s|%s|%s' "$text" "$VOICE" "$MODEL" | shasum | cut -c1-10).mp3"
   if [[ ! -s "$mp3" ]]; then
     jq -n --arg text "$text" --arg model "$MODEL" '{text: $text, model_id: $model}' > "$TMP/body.json"
     code="$(printf 'xi-api-key: %s\n' "$KEY" | curl -sS -o "$TMP/$id.mp3" -w '%{http_code}' -H @- \

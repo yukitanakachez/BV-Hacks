@@ -6,7 +6,7 @@
     { "id": "01b-problem", "beat": "problem", "text": "And every one keeps stopping to ask. Can I run npm test? Can I edit this file?", "say": "And every one keeps stopping to ask. [[slnc 120]] Can I run N P M test? [[slnc 80]] Can I edit this file?", "caption": "Each one stops to ask permission" },
     { "id": "01c-problem", "beat": "problem", "text": "So you switch windows all day, just to say yes.", "caption": "So you switch windows. All day." },
 
-    { "id": "02a-reveal", "beat": "reveal", "text": "Meet Nod.", "caption": "Meet Nod" },
+    { "id": "02a-reveal", "beat": "reveal", "text": "Meet notchAgent.", "say": "Meet Notch Agent.", "eleven": "Meet Notch Agent.", "caption": "Meet notchAgent" },
     { "id": "02b-reveal", "beat": "reveal", "text": "It puts your agents in the MacBook notch.", "caption": "Your agents, in the notch" },
 
     { "id": "03a-progress", "beat": "progress", "text": "Hover, and you see what each agent is doing.", "caption": "Hover for progress" },
@@ -25,11 +25,11 @@
     { "id": "06b-high", "beat": "high", "text": "Delete fourteen files outside this repo? It tells you why.", "caption": "It tells you why" },
     { "id": "06c-high", "beat": "high", "text": "Deny is the default. Allowing takes a deliberate hold.", "caption": "Deny by default. Hold to allow." },
 
-    { "id": "06d-learn", "beat": "learn", "text": "Nod learns how you decide, on your Mac, and flags anything unusual for you.", "caption": "" },
+    { "id": "06d-learn", "beat": "learn", "text": "notchAgent learns how you decide, on your Mac, and flags anything unusual for you.", "say": "Notch Agent learns how you decide, on your Mac, and flags anything unusual for you.", "eleven": "Notch Agent learns how you decide, on your Mac, and flags anything unusual for you.", "caption": "" },
 
     { "id": "07a-many", "beat": "many", "text": "Run as many agents as you like. Requests queue up, one keystroke each.", "caption": "Many agents. One queue." },
     { "id": "07b-many", "beat": "many", "text": "Always allow npm test here, and next time it just goes through.", "say": "Always allow N P M test here, [[slnc 60]] and next time, it just goes through.", "caption": "Always allow npm test here" },
 
-    { "id": "08a-close", "beat": "close", "text": "Nod. Approve your agents from the notch.", "say": "Nod. [[slnc 250]] Approve your agents from the notch.", "caption": "" }
+    { "id": "08a-close", "beat": "close", "text": "notchAgent. Approve your agents from the notch.", "say": "Notch Agent. [[slnc 250]] Approve your agents from the notch.", "eleven": "Notch Agent. Approve your agents from the notch.", "caption": "" }
   ]
 }

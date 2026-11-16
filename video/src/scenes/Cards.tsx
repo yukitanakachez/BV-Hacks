@@ -8,6 +8,7 @@ import {
 } from "remotion";
 import { Clawd } from "../components/Icons";
 import { Island } from "../components/Island";
+import { Wordmark } from "../components/Overlays";
 
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const FONT = '"SF Pro Display", system-ui, -apple-system, sans-serif';
@@ -44,17 +45,17 @@ const NotchBadge: React.FC<{ frame: number; fps: number; liveAt: number }> = ({
 const Lockup: React.FC<{
   frame: number;
   fps: number;
-  nodAt: number;
+  nameAt: number;
   tagAt: number;
   mascotAt: number;
-}> = ({ frame, fps, nodAt, tagAt, mascotAt }) => {
+}> = ({ frame, fps, nameAt, tagAt, mascotAt }) => {
   const m = spring({
     frame: frame - mascotAt,
     fps,
     config: { damping: 11, stiffness: 160, mass: 0.8 },
   });
   const n = spring({
-    frame: frame - nodAt,
+    frame: frame - nameAt,
     fps,
     config: { damping: 16, stiffness: 170 },
   });
@@ -80,7 +81,7 @@ const Lockup: React.FC<{
       <div
         style={{
           marginTop: 34,
-          fontSize: 250,
+          fontSize: 196,
           fontWeight: 800,
           letterSpacing: "-0.045em",
           lineHeight: 0.92,
@@ -88,7 +89,7 @@ const Lockup: React.FC<{
           transform: `translateY(${(1 - n) * 40}px)`,
         }}
       >
-        Nod
+        <Wordmark />
       </div>
       <div
         style={{
@@ -131,7 +132,7 @@ export const TitleCard: React.FC = () => {
           paddingTop: 30,
         }}
       >
-        <Lockup frame={frame} fps={fps} mascotAt={4} nodAt={12} tagAt={26} />
+        <Lockup frame={frame} fps={fps} mascotAt={4} nameAt={12} tagAt={26} />
       </AbsoluteFill>
     </AbsoluteFill>
   );
@@ -153,7 +154,7 @@ export const EndCard: React.FC<{ tagAt?: number }> = ({ tagAt = 30 }) => {
           paddingTop: 10,
         }}
       >
-        <Lockup frame={frame} fps={fps} mascotAt={6} nodAt={12} tagAt={tagAt} />
+        <Lockup frame={frame} fps={fps} mascotAt={6} nameAt={12} tagAt={tagAt} />
       </AbsoluteFill>
       <div
         style={{

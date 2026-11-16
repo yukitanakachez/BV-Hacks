@@ -8,7 +8,7 @@ cd "$(dirname "$0")/.."
 VIDEO="${1:-out/nod-demo.mp4}"
 shift || true
 TIMES=("$@")
-[[ ${#TIMES[@]} -eq 0 ]] && TIMES=(14.0 24.8 35.6 45.4 56.1 70.4 79.5)
+[[ ${#TIMES[@]} -eq 0 ]] && TIMES=(2.0 14.0 24.8 35.6 45.4 56.1 70.4 79.5 93.5)
 
 ffprobe -v error -show_entries format=duration,size:stream=codec_name,width,height,r_frame_rate,sample_rate \
   -of default=nw=1 "$VIDEO"

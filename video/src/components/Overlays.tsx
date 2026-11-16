@@ -398,9 +398,10 @@ const InlineKey: React.FC<{ g: string }> = ({ g }) => (
 );
 
 const renderCaption = (text: string) =>
-  text.split(/(\{opt\}|\{ret\}|npm test)/).map((part, i) => {
+  text.split(/(\{opt\}|\{ret\}|npm test|notchAgent)/).map((part, i) => {
     if (part === "{opt}") return <InlineKey key={i} g="⌥" />;
     if (part === "{ret}") return <InlineKey key={i} g="↵" />;
+    if (part === "notchAgent") return <Wordmark key={i} />;
     if (part === "npm test")
       return (
         <span key={i} style={{ color: "#E8916E" }}>
@@ -409,6 +410,13 @@ const renderCaption = (text: string) =>
       );
     return <React.Fragment key={i}>{part}</React.Fragment>;
   });
+
+/** The product name: "notch" in the accent, "Agent" in the surrounding colour. */
+export const Wordmark: React.FC = () => (
+  <span>
+    <span style={{ color: "#E8916E" }}>notch</span>Agent
+  </span>
+);
 
 export type CaptionCue = {
   from: number;

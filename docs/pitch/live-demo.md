@@ -39,7 +39,7 @@
 1. **A request is slow to appear (>10 s).** Keep talking about Progress while it shows. If it still doesn't come, go to 2.
 2. **Demo mode (no Claude Code, no network).** Menu bar → **Play demo** (or launch `build/Nod.app/Contents/MacOS/Nod --demo`). It replays the scripted story through the real UI: progress, a low-risk `npm test`, the edit with the diff, and the red `rm -rf`. Answer with ⌥↵ and the hold exactly as rehearsed. Say: *"Same app, same UI, scripted events, so the Wi-Fi can't ruin it."*
 3. **Demo mode over the real HTTP path.** In a hidden terminal, run `scripts/simulate.sh story` (add `--session ci-cache` in a second tab for another avatar). This POSTs realistic hook payloads to Nod exactly like the hook does, and the permission steps block until you answer in the notch. It's useful if you want to say "this is the real bridge."
-4. **Nod itself won't start or crashes.** Play the video `video/out/nod-demo.mp4` (93 s) full-screen and narrate over it, muting its audio if you prefer. Then show the code (`RiskEngine`, the hook script) for the remaining time.
+4. **Nod itself won't start or crashes.** Play the video `video/out/nod-demo.mp4` (95 s) full-screen and narrate over it, muting its audio if you prefer. Then show the code (`RiskEngine`, the hook script) for the remaining time.
 
 ## Reset between runs
 

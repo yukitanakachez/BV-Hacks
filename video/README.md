@@ -1,6 +1,6 @@
 # Nod demo video
 
-A 93-second, 1920×1080, 30 fps demo of Nod, made with [Remotion](https://remotion.dev). The island UI is a React port of `docs/design/prototype.html`: same class names, colors, sizes and glass, and the same spring physics, driven frame by frame so every render is identical.
+A 95-second, 1920×1080, 30 fps demo of Nod, made with [Remotion](https://remotion.dev). The island UI is a React port of `docs/design/prototype.html`: same class names, colors, sizes and glass, and the same spring physics, driven frame by frame so every render is identical.
 
 - Narration and shot list: [`script.md`](script.md)
 - Rendered video: `out/nod-demo.mp4`, with review stills in `out/frames/`

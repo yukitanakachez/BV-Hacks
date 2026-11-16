@@ -57,7 +57,7 @@ export const NodDemo: React.FC = () => {
       </Sequence>
       <Sequence name="End" from={END_IN}>
         <AbsoluteFill style={{ opacity: endOp }}>
-          <EndCard tagAt={14 + sec(0.8)} />
+          <EndCard tagAt={14 + sec(1.3)} />
         </AbsoluteFill>
       </Sequence>
 

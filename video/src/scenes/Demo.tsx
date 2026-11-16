@@ -42,7 +42,7 @@ import {
 
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 
-/** The orange bloom behind the notch when Nod comes alive. */
+/** The orange bloom behind the notch when notchAgent comes alive. */
 const RevealGlow: React.FC<{ frame: number }> = ({ frame }) => {
   const op = interpolate(
     frame,

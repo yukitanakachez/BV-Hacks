@@ -1,4 +1,7 @@
-# Nod
+# notchAgent
+
+> Formerly **Nod**. The rename is in progress: the app bundle (`Nod.app`), source folders, settings paths and
+> environment variables still use the old name, and the commands below use them as they are today.
 
 **Approve your Claude Code agents from the MacBook notch, with a plain-English read-out of how risky each request is.**
 
@@ -7,10 +10,10 @@
 ## Why
 
 Running several Claude Code sessions in parallel means each one keeps stopping to ask "run `npm test`?" or "edit
-session.ts?", and every answer costs a window switch. Nod moves progress and approvals into the notch. You see what
+session.ts?", and every answer costs a window switch. notchAgent moves progress and approvals into the notch. You see what
 every agent is doing at a glance, and you answer a request with one keystroke from whatever app you are in.
 
-The same goes for giving an agent its next task. Press `⌃⌥P`, type a rough prompt in the notch, and Nod rewrites it
+The same goes for giving an agent its next task. Press `⌃⌥P`, type a rough prompt in the notch, and notchAgent rewrites it
 into a precise Claude Code prompt, shows it to you to edit, and types it into the session you picked when you press
 Send. It learns from your edits: add "run tests after edits" once and the next polish already has it.
 
@@ -27,7 +30,7 @@ Send. It learns from your edits: add "run tests after edits" once and the next p
   a 0.9 second press-and-hold.
 - **Always-allow rules.** "Always allow `npm test`" saves a per-repo rule. Later matches are answered at once and
   counted in the menu. Rules never match compound commands, anything rated high, or anything outside the project.
-- **Learned approvals.** Nod learns your own approval habits. Every Allow or Deny you make in the notch trains a
+- **Learned approvals.** notchAgent learns your own approval habits. Every Allow or Deny you make in the notch trains a
   small on-device model (online logistic regression with AdaGrad), and later cards show what you would most likely
   do: "Likely allow · 94%", or an amber "Unusual for you · 81% deny"
   ([screenshot](docs/design/app-request-unusual.png)) when your habit and the risk level disagree.
@@ -38,7 +41,7 @@ Send. It learns from your edits: add "run tests after edits" once and the next p
   your rough text to Claude Haiku 5.5 and puts the result in an editable pane. **Send** types it into the session's
   tmux pane. Nothing is sent to a session until you press Send or Return on the text.
 - **Learned style.** Every send is compared with what the polish proposed. Lines you add become "Add:" notes,
-  lines and filler words you keep deleting become "Leave out" notes, and Nod tracks whether you cut or expand the
+  lines and filler words you keep deleting become "Leave out" notes, and notchAgent tracks whether you cut or expand the
   polish, bullets or sentences, and the verbs you use. The notes go into the next polish request, and a
   "Learned: …" chip shows each change. A note you delete twice in a row is dropped. The learning is plain local
   code; see [What leaves your Mac](#what-leaves-your-mac).
@@ -66,7 +69,7 @@ Needs macOS 26 or later, Xcode 26+ (Swift 6.2+), and `jq` for the install script
 ```sh
 scripts/bundle.sh            # release build -> build/Nod.app (menu-bar agent, ad-hoc signed)
 open build/Nod.app           # the mascot appears in the menu bar; the island sits on the notch
-scripts/install-hooks.sh     # adds Nod's hooks to ~/.claude/settings.json
+scripts/install-hooks.sh     # adds notchAgent's hooks to ~/.claude/settings.json
 ```
 
 `install-hooks.sh` writes a timestamped backup next to the file first (`settings.json.nod-backup-<date>`), keeps
@@ -77,7 +80,7 @@ same script after a confirmation.
 The hooks point at the absolute path of `hooks/nod-hook.sh`. If you move the repo or the app, run the install
 script again.
 
-To remove Nod's hooks (and only those):
+To remove notchAgent's hooks (and only those):
 
 ```sh
 scripts/uninstall-hooks.sh
@@ -85,7 +88,7 @@ scripts/uninstall-hooks.sh
 
 ### For the prompt composer
 
-Sending needs `tmux` (`brew install tmux`), and the session has to run inside a tmux pane that Nod knows about.
+Sending needs `tmux` (`brew install tmux`), and the session has to run inside a tmux pane that notchAgent knows about.
 Start Claude Code with the launcher instead of `claude`:
 
 ```sh
@@ -95,11 +98,11 @@ cd ~/code/my-repo
 ```
 
 `nod-claude` runs `claude --session-id <new uuid>` in a new tmux session and writes
-`~/Library/Application Support/Nod/panes/<session id>.json` (pane id, tmux socket, server pid, directory). Nod uses
+`~/Library/Application Support/Nod/panes/<session id>.json` (pane id, tmux socket, server pid, directory). notchAgent uses
 that file to find the pane. A session started any other way still shows up in the notch, but the composer can only
 offer **Copy** for it.
 
-Polish needs an Anthropic API key. Either start Nod from a shell that has `ANTHROPIC_API_KEY` set, or use the
+Polish needs an Anthropic API key. Either start notchAgent from a shell that has `ANTHROPIC_API_KEY` set, or use the
 menu item **Set Anthropic API key…**, which stores it in your login Keychain (service `Nod`, account
 `anthropic-api-key`). Without a key the composer says so and you can still send the text as written.
 
@@ -119,8 +122,8 @@ menu item **Set Anthropic API key…**, which stores it in your login Keychain (
 | Click "Open full diff" | open the file an edit request would change |
 
 `⌥↵` and `⌥⌫` are registered only while a request is showing, so they do not shadow other apps the rest of the time.
-`⌃⌥P` is registered while Nod runs. The composer takes the keyboard only while it is open and gives it back when
-it closes; Nod never becomes the active app. A permission request that arrives while you are writing waits (the
+`⌃⌥P` is registered while notchAgent runs. The composer takes the keyboard only while it is open and gives it back when
+it closes; notchAgent never becomes the active app. A permission request that arrives while you are writing waits (the
 composer says so) and shows as soon as the composer closes.
 A hotkey only answers the card that is on screen, and only once it has been there for half a second (and half a
 second after the previous decision), so a double tap or a key already on its way down never answers a request you
@@ -135,7 +138,7 @@ Safety notes:
   argument containing `=`, a write to `.git/`, `.claude/` or `.mcp.json`, or `sed` / `awk` / `rg` at all.
 - "Install Claude Code hooks…" copies `nod-hook.sh` to `~/Library/Application Support/Nod/` and registers that
   copy, so the hooks keep working if this checkout moves.
-You can still answer in the terminal: the first answer wins and Nod drops the request.
+You can still answer in the terminal: the first answer wins and notchAgent drops the request.
 
 - The composer only types into a pane that is showing Claude Code's input prompt, and never into a session that
   has a permission request open: text typed into a dialog would answer it. In those cases, and when tmux or the
@@ -155,14 +158,14 @@ Demo and debugging:
 
 ```sh
 build/Nod.app/Contents/MacOS/Nod --demo        # play the scripted story (also: menu > Play demo)
-scripts/simulate.sh story                      # post fixture hook payloads to a running Nod
+scripts/simulate.sh story                      # post fixture hook payloads to a running notchAgent
 build/Nod.app/Contents/MacOS/Nod --snapshot build/snapshots   # render every state to PNG
 NOD_LOG=1 NOD_PORT=47480 build/Nod.app/Contents/MacOS/Nod     # debug log, another port
 ```
 
 `NOD_LOG` output never contains prompt text, polished text, style notes or the API key; composer lines are counts
 and status only (`composer: polish ok, 42 -> 180 chars, 2 style notes, 412 ms`). `NOD_STYLE_FILE`,
-`NOD_PANES_DIR`, `NOD_TMUX` and `NOD_APPROVALS_FILE` point Nod at another style file, pane directory, tmux binary
+`NOD_PANES_DIR`, `NOD_TMUX` and `NOD_APPROVALS_FILE` point notchAgent at another style file, pane directory, tmux binary
 or approval model.
 
 ## Architecture
@@ -211,14 +214,14 @@ The composer is specified in
 
 - **Nothing is auto-allowed except by a rule you created.** The risk engine and the learned approval model only
   advise.
-- **Fail open to Claude Code's own prompt.** If Nod is not running, crashes, or times out, the hook prints nothing
+- **Fail open to Claude Code's own prompt.** If notchAgent is not running, crashes, or times out, the hook prints nothing
   and exits 0 within milliseconds, and Claude Code asks in the terminal as usual. The hook never exits non-zero.
 - **Nothing is sent to a session without you.** The composer never auto-sends: Polish only fills the editable
   pane, and text reaches a session only when you press Send (or Return on the text).
 - **One outbound call, and only when you press Polish.** See [What leaves your Mac](#what-leaves-your-mac). The
   hook server still listens on 127.0.0.1 only, and approvals, the risk read-out, rules and progress never use the
   network.
-- **Deny rules still win.** An allow from Nod does not override a deny rule in Claude Code's settings.
+- **Deny rules still win.** An allow from notchAgent does not override a deny rule in Claude Code's settings.
 - **`AskUserQuestion` and `ExitPlanMode` pass through** to the terminal untouched.
 - **Your settings are backed up** before the install or uninstall script changes them.
 
@@ -241,7 +244,7 @@ learned approval model (trained and run in-process, never uploaded), the git com
 tmux send, and all of the approval features.
 
 To turn it off, untick **Polish prompts with Claude Haiku** in the menu. The composer then sends your text as
-written and Nod makes no network request at all. The profile still learns from what you send.
+written and notchAgent makes no network request at all. The profile still learns from what you send.
 
 ## Tests
 
@@ -263,10 +266,10 @@ offline stub (no network), a fake `tmux` that records its arguments, and tempora
 - Claude Code only, on a Mac with macOS 26+. Screens without a notch get a simulated one.
 - The risk read-out is lexical: it reads the command text, not the disk. It cannot say how many files an `rm`
   would delete, and an unusual command can be rated lower or higher than it deserves. Read the command.
-- The terminal prompt stays visible while Nod holds a request; either place can answer.
+- The terminal prompt stays visible while notchAgent holds a request; either place can answer.
 - Rules have no editing UI yet (the Rules tab in Progress is a placeholder).
 - The composer can only send to sessions started with `scripts/nod-claude` (tmux). After `/clear` the session id
-  changes and Nod falls back to matching the pane by directory, which works only while one launcher session runs
+  changes and notchAgent falls back to matching the pane by directory, which works only while one launcher session runs
   in that directory.
 - The style learner is simple and literal. It compares lines by shared words, so it can learn a note you did not
   mean; the note is dropped once you delete its effect twice, or edit `style.json`.
