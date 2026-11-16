@@ -36,6 +36,7 @@ Send. It learns from your edits: add "run tests after edits" once and the next p
   ([screenshot](docs/design/app-request-unusual.png)) when your habit and the risk level disagree.
   The chip appears after 5 decisions and only when the model leans at least 60% one way. It is advice only: it
   never answers a request, never changes the default button, and never skips the hold on a high-risk card.
+  See [The approval model](#the-approval-model) for the math.
 - **Several sessions.** Requests from all sessions queue up first-in, first-out.
 - **Prompt composer.** `⌃⌥P` (or a click on the session's avatar) opens a text field in the notch. **Polish** sends
   your rough text to Claude Haiku 5.5 and puts the result in an editable pane. **Send** types it into the session's
@@ -209,6 +210,116 @@ The full contract is in [`docs/superpowers/plans/hook-contract.md`](docs/superpo
 design in [`docs/superpowers/specs/2026-11-15-nod-design.md`](docs/superpowers/specs/2026-11-15-nod-design.md).
 The composer is specified in
 [`docs/superpowers/specs/2026-11-15-prompt-composer.md`](docs/superpowers/specs/2026-11-15-prompt-composer.md).
+
+## The approval model
+
+notchAgent predicts your answer to each permission request with an on-device, online-learned probabilistic
+classifier: a sparse logistic regression trained by adaptive stochastic gradient descent, one decision at a time,
+entirely in-process. There is no cloud inference, no training server and no batch retraining. The code is in
+`Sources/NodCore/Learn`.
+
+### Formulation
+
+Each request $r$ is a binary classification problem with label $y \in \{0, 1\}$ (deny, allow). The model estimates
+the posterior $P(y = 1 \mid r)$. Labels are observed only when you explicitly answer in the notch.
+
+### Feature map
+
+A request is embedded as a sparse binary indicator vector $\phi(r) \in \{0,1\}^d$ over an open, string-keyed
+vocabulary. The vocabulary grows as new tools, programs and repos appear, and usually fewer than a dozen features are
+active per request. Features are purely lexical: they come from the hook payload and the risk engine's assessment, and
+the extractor never reads the disk.
+
+| Feature family | Example | Source |
+|---|---|---|
+| Intercept | `bias` | always active |
+| Tool | `tool:Bash`, `tool:Edit` | hook payload |
+| Risk level | `level:low`, `level:review`, `level:high` | risk engine |
+| Risk reasons | `reason:outside the project` | risk engine's reason chips |
+| Repository | `repo:acme-web` | last component of the session's cwd |
+| Program | `cmd:npm` | first word of the command, after removing `VAR=value` assignment words |
+| Command prefix | `prefix:npm run lint` | the same canonical prefix the rule engine matches |
+| Compound command | `shell-operators` | `&&`, `\|`, `;`, redirections, subshells, `$` substitutions |
+| File type | `ext:tsx` | edit tools' target path |
+| Network host | `host:docs.example.com` | `WebFetch` URL |
+| MCP server | `mcp:github` | `mcp__<server>__<tool>` |
+
+### Model
+
+$$
+p(r) = \sigma\Big(b_{\text{level}(r)} + \sum_{k \in \phi(r)} w_k\Big), \qquad \sigma(z) = \frac{1}{1 + e^{-z}}
+$$
+
+$b_{\text{level}}$ is a fixed, risk-conditioned logit offset that acts as an informative prior: $+1.0$ for low
+($\sigma \approx 0.73$), $+0.5$ for review ($\approx 0.62$) and $-1.5$ for high ($\approx 0.18$). The risk engine is
+therefore the cold-start baseline, and the learned weights $w$ encode only how your behaviour deviates from it. A
+brand-new model already leans towards deny on destructive requests, before it has seen any of your decisions.
+
+### Online optimisation
+
+Every decision is one stochastic gradient step on the L2-regularised negative log-likelihood (binary cross-entropy):
+
+$$
+\mathcal{L}(w) = -\big[\,y \log p + (1 - y)\log(1 - p)\,\big] + \frac{\lambda}{2}\sum_{k \in \phi(r)} w_k^2
+$$
+
+For each active feature, the gradient is $g_k = (p - y) + \lambda w_k$. Updates use **AdaGrad** per-coordinate
+adaptive learning rates:
+
+$$
+G_k \leftarrow G_k + g_k^2, \qquad w_k \leftarrow w_k - \frac{\eta\, g_k}{\sqrt{G_k} + \epsilon}
+$$
+
+with $\eta = 0.35$, $\lambda = 0.005$ and $\epsilon = 10^{-8}$. Only the active coordinates are touched, so an update
+costs $O(|\phi(r)|)$ regardless of vocabulary size. The adaptive step size lets a rarely seen feature, such as a
+program you have never run, move quickly from a single decision, while frequent features converge and stabilise. The
+model generalises across feature families: it can predict a command it has never seen, such as a new `npm test`
+argument or a different pipe-to-shell installer, from the weights of the program, prefix and operators it shares
+with past decisions.
+
+### Inference, confidence gating and anomaly detection
+
+Inference is a sparse dot product and a sigmoid, computed synchronously when the request reaches the store. The
+prediction chip is shown only when two gates both pass:
+
+- **Sample-size gate:** at least $n_{\min} = 5$ decisions have been learned.
+- **Confidence gate:** $\max(p, 1 - p) \ge 0.60$. Displayed confidence is $\operatorname{round}(100 \cdot \max(p, 1-p))$.
+
+A prediction is flagged as an **anomaly** (the amber "Unusual for you" chip) when the learned habit contradicts the
+risk prior: a likely allow on a high-risk request, or a likely deny on a low or review request.
+
+### Label hygiene
+
+The training signal is restricted to explicit Allow and Deny decisions made in the notch. Timeouts, dismissals,
+answers given in the terminal and always-allow rule matches never train the model, and demo playback trains only a throwaway in-memory model, never yours. This closes the
+feedback loop, so the model never learns from its own suggestions or from the rule engine's output, and it keeps
+ambiguous, non-decisions out of the labels.
+
+### Capacity control and persistence
+
+The vocabulary is capped at 4,000 features. On overflow, the least-frequently-observed features are pruned down to
+90% of the cap, and the intercept is never pruned. This bounds memory and file size no matter how long the model has
+been running. The full optimiser state is serialised as JSON: weights $w$, AdaGrad accumulators $G$, per-feature
+occurrence counts, and decision and allow totals. It is written with crash-safe atomic replacement (a mode-0600 temp
+file, then `rename(2)`) behind a lock, so the model survives restarts without losing optimiser state.
+
+### Why this model
+
+The model sits in a safety-critical approval path, so it has to be deterministic, interpretable and data-efficient.
+Every weight is a readable entry in `approvals.json` that you can inspect or reset. It learns useful structure from a
+handful of examples, and no data ever leaves the machine. The prediction is strictly advisory: it never answers a
+request, never changes the default button, and never removes the hold on a high-risk card.
+
+`Tests/NodCoreTests/ApprovalModelTests.swift` and `Tests/NodBridgeTests/SessionStoreTests.swift` cover these
+behaviours:
+
+- the cold-start prior and both gates;
+- convergence on a user's habits and generalisation to unseen commands;
+- the anomaly flag;
+- numerical stability after 2,000 updates;
+- pruning past the cap;
+- atomic, 0600 persistence and recovery from a corrupt file;
+- the exact set of events that do and don't train the model.
 
 ## Safety guarantees
 
